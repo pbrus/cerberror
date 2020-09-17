@@ -10,7 +10,7 @@ from typing import Any, Hashable, Union
 
 class PathFinder:
     """
-    PathFinder walks through dictionary and gets sequences of keys to all elements.
+    PathFinder walks through error's dictionary and gets sequences of keys to all elements.
 
     """
 
@@ -40,17 +40,29 @@ class PathFinder:
         return data
 
     @staticmethod
-    def _getitem_skipping_lists(data: Union[dict, list], item: Hashable) -> Any:
+    def _getitem_skipping_lists(error: Union[dict, list], item: Hashable) -> Any:
         """
         Get item from a dictionary.
 
         """
-        return getitem(PathFinder.skip_lists(data), item)
+        return getitem(PathFinder.skip_lists(error), item)
 
     @staticmethod
-    def _get_element_by_path(data: Union[dict, list], path: tuple) -> Any:
+    def _get_element_by_path(error: Union[dict, list], path: tuple) -> Any:
         """
         Get element by path from a nested dictionaries.
 
         """
-        return reduce(PathFinder._getitem_skipping_lists, path, data)
+        return PathFinder.skip_lists(
+            reduce(
+                PathFinder._getitem_skipping_lists, path, PathFinder.skip_lists(error)
+            )
+        )
+
+    @staticmethod
+    def _del_element_by_path(error: Union[dict, list], path: tuple) -> None:
+        """
+        Remove element by path from a nested dictionaries.
+
+        """
+        del PathFinder._get_element_by_path(error, path[:-1])[path[-1]]

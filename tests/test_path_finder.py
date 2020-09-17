@@ -47,3 +47,29 @@ def test_getitem_skipping_lists(dct, item, result):
 )
 def test_get_element_by_path(dct, path, result):
     assert PathFinder._get_element_by_path(dct, path) == result
+
+
+@pytest.mark.parametrize(
+    "dct, path, result",
+    [
+        (
+            [{1: 2, 3: {"a": 4, "b": [{5: 0, 6: "value"}]}}],
+            (3, "b", 6),
+            [{1: 2, 3: {"a": 4, "b": [{5: 0}]}}],
+        ),
+        ({1: [{"a": {2: "b"}}]}, (1, "a", 2), {1: [{"a": {}}]}),
+        (
+            [[{1: "a", 2: [-1, 0, 1], "b": [{3: "value", 4: [{5: 6}]}]}]],
+            ("b", 4, 5),
+            [[{1: "a", 2: [-1, 0, 1], "b": [{3: "value", 4: [{}]}]}]],
+        ),
+        (
+            [[{1: "a", 2: [-1, 0, 1], "b": [{3: "value", 4: [{5: 6}]}]}]],
+            ("b",),
+            [[{1: "a", 2: [-1, 0, 1]}]],
+        ),
+    ],
+)
+def test_del_element_by_path(dct, path, result):
+    PathFinder._del_element_by_path(dct, path)
+    assert dct == result
