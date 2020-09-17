@@ -1,0 +1,49 @@
+"""
+Unit tests for cerberus.path_finder module.
+
+"""
+from unittest.mock import Mock
+
+import pytest
+
+from cerberror.path_finder import PathFinder
+
+
+@pytest.fixture
+def path_finder() -> PathFinder:
+    errors = Mock()
+    yield PathFinder(errors)
+
+
+@pytest.mark.parametrize(
+    "data, result",
+    [
+        ({"a": 1, "b": 2, "c": [3, 4]}, {"a": 1, "b": 2, "c": [3, 4]}),
+        ([{"a": 1, "b": [2, 3, 4]}], {"a": 1, "b": [2, 3, 4]}),
+        ((1, 2, 3, "a"), (1, 2, 3, "a")),
+        ([[["a", 1]]], ["a", 1]),
+    ],
+)
+def test_skip_list(data, result):
+    assert PathFinder.skip_lists(data) == result
+
+
+@pytest.mark.parametrize(
+    "dct, item, result",
+    [([{"a": 1, "b": 2}], "a", 1), ([[{"c": 3, "d": 4}]], "c", 3), ({5: "e"}, 5, "e")],
+)
+def test_getitem_skipping_lists(dct, item, result):
+    assert PathFinder._getitem_skipping_lists(dct, item) == result
+
+
+@pytest.mark.parametrize(
+    "dct, path, result",
+    [
+        ([{"a": [{"b": 1, "c": 2, "d": [{"e": 3}]}]}], ("a", "d", "e"), 3),
+        ({1: {2: 1, 3: [[{4: 1, "key": {7: 0}}]]}}, (1, 3, "key", 7), 0),
+        ([{"a": [{"b": {"c": [1, 2], "d": 0}}]}], ("a", "b", "c"), [1, 2]),
+        ({"a": [{"b": 1, "c": 2, "d": [{"e": 3}, 4]}]}, ("a", "d"), [{"e": 3}, 4]),
+    ],
+)
+def test_get_element_by_path(dct, path, result):
+    assert PathFinder._get_element_by_path(dct, path) == result
