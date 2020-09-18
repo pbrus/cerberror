@@ -49,7 +49,7 @@ class PathFinder:
 
     def _get_element_by_path(self, error: Union[dict, list], path: tuple) -> Any:
         """
-        Get element by path from a nested dictionaries.
+        Get an element by a path from nested dictionaries.
 
         """
         return self.skip_lists(
@@ -58,7 +58,25 @@ class PathFinder:
 
     def _del_element_by_path(self, error: Union[dict, list], path: tuple) -> None:
         """
-        Remove element by path from a nested dictionaries.
+        Remove an element by a path from nested dictionaries.
 
         """
         del self._get_element_by_path(error, path[:-1])[path[-1]]
+
+    def _get_path_to_element(self, error: Union[dict, list]) -> tuple:
+        """
+        Get a path to an element in nested dictionaries.
+
+        """
+        path = list()
+        error = self.skip_lists(error)
+
+        while isinstance(error, dict):
+            if error == {}:
+                break
+
+            key, error = error.popitem()
+            error = self.skip_lists(error)
+            path.append(key)
+
+        return tuple(path)

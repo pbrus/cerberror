@@ -73,3 +73,19 @@ def test_get_element_by_path(path_finder, dct, path, result):
 def test_del_element_by_path(path_finder, dct, path, result):
     path_finder._del_element_by_path(dct, path)
     assert dct == result
+
+
+@pytest.mark.parametrize(
+    "dct, result",
+    [
+        ([{1: "a", 2: [-1, 0, 1], "b": [{3: "value", 4: [{}]}]}], ("b", 4)),
+        ({1: {"a": [{2: "b", 3: {4: "value"}}]}}, (1, "a", 3, 4)),
+        ([{1: {"a": [{2: "b", 3: [{}]}]}}], (1, "a", 3)),
+        (
+            {"a": 1, "b": 2, "c": {3: {"aa": 4, "bb": [{"cc": 1}, "value"]}}},
+            ("c", 3, "bb"),
+        ),
+    ],
+)
+def test_get_path_to_element(path_finder, dct, result):
+    assert path_finder._get_path_to_element(dct) == result
