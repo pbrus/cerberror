@@ -16,6 +16,7 @@ class PathFinder:
 
     def __init__(self, errors: dict) -> None:
         self._errors = errors
+        self._path_list = None
 
     @staticmethod
     def skip_lists(data: Union[dict, list]) -> Any:
@@ -39,30 +40,25 @@ class PathFinder:
 
         return data
 
-    @staticmethod
-    def _getitem_skipping_lists(error: Union[dict, list], item: Hashable) -> Any:
+    def _getitem_skipping_lists(self, error: Union[dict, list], item: Hashable) -> Any:
         """
         Get item from a dictionary.
 
         """
-        return getitem(PathFinder.skip_lists(error), item)
+        return getitem(self.skip_lists(error), item)
 
-    @staticmethod
-    def _get_element_by_path(error: Union[dict, list], path: tuple) -> Any:
+    def _get_element_by_path(self, error: Union[dict, list], path: tuple) -> Any:
         """
         Get element by path from a nested dictionaries.
 
         """
-        return PathFinder.skip_lists(
-            reduce(
-                PathFinder._getitem_skipping_lists, path, PathFinder.skip_lists(error)
-            )
+        return self.skip_lists(
+            reduce(self._getitem_skipping_lists, path, self.skip_lists(error))
         )
 
-    @staticmethod
-    def _del_element_by_path(error: Union[dict, list], path: tuple) -> None:
+    def _del_element_by_path(self, error: Union[dict, list], path: tuple) -> None:
         """
         Remove element by path from a nested dictionaries.
 
         """
-        del PathFinder._get_element_by_path(error, path[:-1])[path[-1]]
+        del self._get_element_by_path(error, path[:-1])[path[-1]]

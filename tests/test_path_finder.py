@@ -32,8 +32,8 @@ def test_skip_list(data, result):
     "dct, item, result",
     [([{"a": 1, "b": 2}], "a", 1), ([[{"c": 3, "d": 4}]], "c", 3), ({5: "e"}, 5, "e")],
 )
-def test_getitem_skipping_lists(dct, item, result):
-    assert PathFinder._getitem_skipping_lists(dct, item) == result
+def test_getitem_skipping_lists(path_finder, dct, item, result):
+    assert path_finder._getitem_skipping_lists(dct, item) == result
 
 
 @pytest.mark.parametrize(
@@ -45,8 +45,8 @@ def test_getitem_skipping_lists(dct, item, result):
         ({"a": [{"b": 1, "c": 2, "d": [{"e": 3}, 4]}]}, ("a", "d"), [{"e": 3}, 4]),
     ],
 )
-def test_get_element_by_path(dct, path, result):
-    assert PathFinder._get_element_by_path(dct, path) == result
+def test_get_element_by_path(path_finder, dct, path, result):
+    assert path_finder._get_element_by_path(dct, path) == result
 
 
 @pytest.mark.parametrize(
@@ -70,6 +70,6 @@ def test_get_element_by_path(dct, path, result):
         ),
     ],
 )
-def test_del_element_by_path(dct, path, result):
-    PathFinder._del_element_by_path(dct, path)
+def test_del_element_by_path(path_finder, dct, path, result):
+    path_finder._del_element_by_path(dct, path)
     assert dct == result
