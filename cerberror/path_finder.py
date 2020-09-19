@@ -103,3 +103,15 @@ class PathFinder:
             temp_errors = deepcopy(errors)
 
         return tuple(self._paths_list)
+
+    @property
+    def paths(self) -> Union[tuple, list]:
+        """
+        Property of a list with all paths coming from an error dictionary.
+
+        Returns
+        -------
+        tuple : A list of all paths.
+
+        """
+        return self._paths_list
