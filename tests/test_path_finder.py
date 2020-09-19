@@ -81,11 +81,30 @@ def test_del_element_by_path(path_finder, dct, path, result):
         ([{1: "a", 2: [-1, 0, 1], "b": [{3: "value", 4: [{}]}]}], ("b", 4)),
         ({1: {"a": [{2: "b", 3: {4: "value"}}]}}, (1, "a", 3, 4)),
         ([{1: {"a": [{2: "b", 3: [{}]}]}}], (1, "a", 3)),
-        (
-            {"a": 1, "b": 2, "c": {3: {"aa": 4, "bb": [{"cc": 1}, "value"]}}},
-            ("c", 3, "bb"),
-        ),
+        ({"a": 1, "b": 2, "c": {3: {"aa": 4, "bb": [{"cc": 1}, "value"]}}}, ("c", 3, "bb")),
     ],
 )
 def test_get_path_to_element(path_finder, dct, result):
     assert path_finder._get_path_to_element(dct) == result
+
+
+@pytest.mark.parametrize(
+    "dct, result",
+    [
+        (
+            {"a": 1, "b": 2, "c": [{3: "value", "d": 4, "e": {5: [[0, 1]]}}]},
+            (("a",), ("b",), ("c", 3), ("c", "d"), ("c", "e", 5)),
+        ),
+        (
+            {1: "a", 2: {3: "b", 4: "c", 5: [{1: 1}], "six": "d", 7: [{8: {9: "value"}}]}},
+            ((1,), (2, 3), (2, 4), (2, 5, 1), (2, "six"), (2, 7, 8, 9)),
+        ),
+        ({1: "a", 2: [{}], 3: {"b": {}}}, ((1,),)),
+    ],
+)
+def test_get_paths(path_finder, dct, result):
+    path_finder._errors = dct
+    paths = path_finder.get_paths()
+
+    for path in paths:
+        assert path in result

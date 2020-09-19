@@ -2,9 +2,9 @@
 The module contains PathFinder class which goes through dictionary of errors and gets all paths to elements.
 
 """
+from copy import deepcopy
 from functools import reduce
 from operator import getitem
-
 from typing import Any, Hashable, Union
 
 
@@ -16,7 +16,7 @@ class PathFinder:
 
     def __init__(self, errors: dict) -> None:
         self._errors = errors
-        self._path_list = None
+        self._paths_list = list()
 
     @staticmethod
     def skip_lists(data: Union[dict, list]) -> Any:
@@ -80,3 +80,26 @@ class PathFinder:
             path.append(key)
 
         return tuple(path)
+
+    def get_paths(self) -> tuple:
+        """
+        Get paths to all elements of error nested dictionaries.
+
+        Returns
+        -------
+        tuple : A list of all paths. Each path is represented by a tuple consisting a sequence of keys.
+
+        """
+        errors = deepcopy(self._errors)
+        temp_errors = deepcopy(self._errors)
+
+        while temp_errors != {}:
+            path = self._get_path_to_element(temp_errors)
+
+            if self._get_element_by_path(errors, path) != {}:
+                self._paths_list.append(path)
+
+            self._del_element_by_path(errors, path)
+            temp_errors = deepcopy(errors)
+
+        return tuple(self._paths_list)
