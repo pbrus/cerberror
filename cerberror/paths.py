@@ -15,6 +15,14 @@ class PathFinder:
     """
 
     def __init__(self, errors: dict) -> None:
+        """
+        Initialize an object.
+
+        Parameters
+        ----------
+        errors : Errors dictionary produced by Cerberus.
+
+        """
         self._errors = errors
         self._paths_list = list()
 
@@ -25,11 +33,11 @@ class PathFinder:
 
         Parameters
         ----------
-        data : Input data of any type.
+        data : Input data, may be a dictionary or a list.
 
         Returns
         -------
-        data : Output data of any type without the most external lists.
+        data : Output data without the most external lists.
 
         """
         while isinstance(data, list):
