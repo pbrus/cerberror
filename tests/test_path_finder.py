@@ -6,7 +6,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from cerberror.path_finder import PathFinder
+from cerberror.paths import PathFinder
 
 
 @pytest.fixture
