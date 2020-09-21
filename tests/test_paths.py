@@ -1,5 +1,5 @@
 """
-Unit tests for cerberus.path_finder module.
+Unit tests for cerberus.paths module.
 
 """
 from unittest.mock import Mock
