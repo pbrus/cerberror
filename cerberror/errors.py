@@ -30,13 +30,12 @@ class ErrConverter:
         Read records from a file containing customized errors.
 
         """
-        regex = r"^\s*([(].+[)])\s+(\d+)\s+([\"].+[\"])"
         messages = list()
 
         try:
             with open(self._path_to_file, "r") as file:
                 for line in file:
-                    record = re.split(regex, line.strip())[1:-1]
+                    record = re.split(r"^\s*([(].*[,].*[)])\s+(\d+)\s+([\"].+[\"])", line.strip())[1:-1]
                     if record != list():
                         messages.append(tuple([i for i in map(literal_eval, record)]))
         except FileNotFoundError:
