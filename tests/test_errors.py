@@ -16,7 +16,16 @@ def open_mock():
         yield mock
 
 
-def test_read_messages(open_mock):
+@pytest.fixture
+def converter_init_mock():
+    with patch("cerberror.errors.ErrConverter.__init__") as init_mock:
+        init_mock.return_value = None
+        err = ErrConverter()
+        err._path_to_file = None
+        yield err
+
+
+def test_read_predefined_messages(converter_init_mock, open_mock):
     stream = StringIO(
         "# path code message\n"
         "(1, 2, 'a')    67    \"My custom message for {{code}}\"\n"
@@ -36,6 +45,5 @@ def test_read_messages(open_mock):
     )
 
     open_mock.return_value = stream
-    err = ErrConverter("path")
 
-    assert err._read_messages() == result
+    assert converter_init_mock._read_predefined_messages() == result

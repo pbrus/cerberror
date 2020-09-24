@@ -24,8 +24,9 @@ class ErrConverter:
         self._path_to_file = path_to_file
         self._any_error = False
         self._error_list = list()
+        self._predefined_messages = self._read_predefined_messages()
 
-    def _read_messages(self) -> tuple:
+    def _read_predefined_messages(self) -> tuple:
         """
         Read records from a file containing customized errors.
 
