@@ -36,9 +36,17 @@ class ErrConverter:
         try:
             with open(self._path_to_file, "r") as file:
                 for line in file:
-                    record = re.split(r"^\s*([(].*[,].*[)])\s+(\d+)\s+([\"].+[\"])", line.strip())[1:-1]
+                    record = re.split(
+                        r"^\s*([(].*[,].*[)])\s+(\d+)\s+([\"].+[\"])", line.strip()
+                    )[1:-1]
                     if record != list():
                         messages.append(tuple([i for i in map(literal_eval, record)]))
+
+            if len(messages) == 0:
+                self._report_error(
+                    f"No customized messages have been found in '{self._path_to_file}' file"
+                )
+
         except FileNotFoundError:
             self._report_error(f"File '{self._path_to_file}' does not exist")
 
