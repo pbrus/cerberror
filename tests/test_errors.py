@@ -9,7 +9,6 @@ import pytest
 
 from cerberror.errors import ErrConverter
 
-
 path_to_file = "path/to/file"
 
 
@@ -33,6 +32,7 @@ def converter_init_mock():
         init_mock.return_value = None
         converter = ErrConverter(path_to_file)
         converter._path_to_file = path_to_file
+        converter._any_error = False
         yield converter
 
 
@@ -112,3 +112,20 @@ def test_read_predefined_messages_file_not_found_error(converter_report_error_mo
 )
 def test_convert_message(converter_init_mock, error, predefined_msg, converted_msg):
     assert converter_init_mock.convert_message(error, predefined_msg) == converted_msg
+
+
+@pytest.mark.parametrize(
+    "error, predefined_msg, call_counter",
+    [
+        (
+            ValidationError({"field": "mass", "constraint": [100, 150, 200]}),
+            "The {{ field}} should be set on {{constraint}} only",
+            1,
+        ),
+        (ValidationError({"month": "February", "max": 29}), "{{nonth}} has max {{ max }} days", 2),
+    ],
+)
+def test_convert_message_no_attr(converter_report_error_mock, error, predefined_msg, call_counter):
+    converter_report_error_mock.convert_message(error, predefined_msg)
+
+    assert converter_report_error_mock._report_error.call_count == call_counter
