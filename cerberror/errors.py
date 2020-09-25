@@ -26,14 +26,14 @@ class ErrConverter:
         self._path_to_file = path_to_file
         self._any_error = False
         self._error_list = list()
-        self._predefined_messages = self._read_predefined_messages()
+        self._user_defined_records = self._read_predefined_messages()
 
     def _read_predefined_messages(self) -> tuple:
         """
         Read records from a file containing customized errors.
 
         """
-        messages = list()
+        records = list()
 
         try:
             with open(self._path_to_file, "r") as file:
@@ -42,9 +42,9 @@ class ErrConverter:
                         r"^\s*([(].*[,].*[)])\s+(\d+)\s+([\"].+[\"])", line.strip()
                     )[1:-1]
                     if record != list():
-                        messages.append(tuple([i for i in map(literal_eval, record)]))
+                        records.append(tuple([i for i in map(literal_eval, record)]))
 
-            if len(messages) == 0:
+            if len(records) == 0:
                 self._report_error(
                     f"No customized messages have been found in '{self._path_to_file}' file"
                 )
@@ -52,7 +52,7 @@ class ErrConverter:
         except FileNotFoundError:
             self._report_error(f"File '{self._path_to_file}' does not exist")
 
-        return tuple(messages)
+        return tuple(records)
 
     def _report_error(self, error: str) -> None:
         """
@@ -90,3 +90,18 @@ class ErrConverter:
                 )
 
         return message if not any_error else None
+
+    @property
+    def user_defined_records(self) -> tuple:
+        """
+        A property for user defined records.
+
+        Returns
+        -------
+        tuple : A list of records. Each record consists of:
+                - path to message
+                - code of error
+                - predefined message
+
+        """
+        return self._user_defined_records
