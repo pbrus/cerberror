@@ -10,7 +10,7 @@ from cerberror.paths import PathFinder
 
 
 @pytest.fixture
-def path_finder() -> PathFinder:
+def path_finder():
     errors = Mock()
     yield PathFinder(errors)
 

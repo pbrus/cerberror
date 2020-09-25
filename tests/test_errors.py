@@ -13,6 +13,14 @@ from cerberror.errors import ErrConverter
 path_to_file = "path/to/file"
 
 
+class ValidationError:
+    """Class emulating ValidationError of Cerberus."""
+
+    def __init__(self, attr_dct) -> None:
+        for attr in attr_dct:
+            setattr(self, attr, attr_dct[attr])
+
+
 @pytest.fixture
 def open_mock():
     with patch("cerberror.errors.open") as mock:
@@ -79,3 +87,28 @@ def test_read_predefined_messages_file_not_found_error(converter_report_error_mo
     converter_report_error_mock._report_error.assert_called_once_with(
         f"File '{path_to_file}' does not exist"
     )
+
+
+@pytest.mark.parametrize(
+    "error, predefined_msg, converted_msg",
+    [
+        (
+            ValidationError({"field": "mass", "constraint": [100, 150, 200]}),
+            "The {{field}} should be set on {{constraint}} only",
+            "The mass should be set on [100, 150, 200] only",
+        ),
+        (
+            ValidationError({"month": "February", "max": 29}),
+            "{{month}} has max {{max}} days",
+            "February has max 29 days",
+        ),
+        (
+            ValidationError({"value": 53, "range": (12, 44)}),
+            "{{value}} should be in range {{range}}",
+            "53 should be in range (12, 44)",
+        ),
+        (ValidationError({}), "Example error message", "Example error message"),
+    ],
+)
+def test_convert_message(converter_init_mock, error, predefined_msg, converted_msg):
+    assert converter_init_mock.convert_message(error, predefined_msg) == converted_msg

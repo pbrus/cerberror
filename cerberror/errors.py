@@ -5,6 +5,8 @@ The module contains ErrConverter class replacing Cerberus errors to those define
 import re
 from ast import literal_eval
 
+from cerberus.errors import ValidationError
+
 
 class ErrConverter:
     """
@@ -59,3 +61,26 @@ class ErrConverter:
         """
         self._any_error = True
         self._error_list.append(error)
+
+    def convert_message(self, error: ValidationError, message: str) -> str:
+        """
+        Convert a predefined message. This method replaces expressions within double curly brackets of a predefined
+        message with counterparts from ValidationError class.
+
+        Parameters
+        ----------
+        error : ValidationError object from Cerberus.
+        message : Predefined message defined by a user.
+
+        Returns
+        -------
+        message : Error message defined by a user.
+
+        """
+        attributes = [i.strip("{}") for i in re.findall(r"{{[^{}]*}}", message)]
+
+        for attr in attributes:
+            if hasattr(error, attr):
+                message = message.replace("{{" + attr + "}}", str(getattr(error, attr)))
+
+        return message
