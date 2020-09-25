@@ -77,17 +77,16 @@ class ErrConverter:
         message : Error message defined by a user. None if an error occurs.
 
         """
+        any_error = False
         attributes = [i.strip("{}") for i in re.findall(r"{{[^{}]+}}", message)]
 
         for attr in attributes:
             if hasattr(error, attr):
                 message = message.replace("{{" + attr + "}}", str(getattr(error, attr)))
             else:
+                any_error = True
                 self._report_error(
                     f"Invalid expression '{{{{{attr}}}}}' in file '{self._path_to_file}'"
                 )
 
-        if self._any_error:
-            message = None
-
-        return message
+        return message if not any_error else None
