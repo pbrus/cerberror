@@ -4,6 +4,7 @@ The module contains ErrConverter class replacing Cerberus errors to those define
 """
 import re
 from ast import literal_eval
+from pathlib import Path
 
 from cerberus.errors import ValidationError
 
@@ -23,7 +24,7 @@ class ErrConverter:
         path_to_file : A name of the file storing customized error messages.
 
         """
-        self._path_to_file = path_to_file
+        self._path_to_file = Path(path_to_file)
         self.any_error = False
         self.error_list = list()
         self._user_defined_records = self._read_predefined_messages()
