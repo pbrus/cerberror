@@ -1,5 +1,5 @@
 """
-Unit tests for cerberus.errors module.
+Unit tests for cerberror.errors module.
 
 """
 from io import StringIO

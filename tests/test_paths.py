@@ -1,8 +1,8 @@
 """
-Unit tests for cerberus.paths module.
+Unit tests for cerberror.paths module.
 
 """
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
