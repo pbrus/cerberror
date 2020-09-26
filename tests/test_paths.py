@@ -2,7 +2,7 @@
 Unit tests for cerberus.paths module.
 
 """
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -11,8 +11,9 @@ from cerberror.paths import PathFinder
 
 @pytest.fixture
 def path_finder():
-    errors = Mock()
-    yield PathFinder(errors)
+    with patch("cerberror.paths.PathFinder.__init__") as init_mock:
+        init_mock.return_value = None
+        yield PathFinder({})
 
 
 @pytest.mark.parametrize(
@@ -102,9 +103,9 @@ def test_get_path_to_element(path_finder, dct, result):
         ({1: "a", 2: [{}], 3: {"b": {}}}, ((1,),)),
     ],
 )
-def test_get_paths(path_finder, dct, result):
+def test_find_paths(path_finder, dct, result):
     path_finder._errors = dct
-    paths = path_finder.get_paths()
+    paths = path_finder._find_paths()
 
     for path in paths:
         assert path in result

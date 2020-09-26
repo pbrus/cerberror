@@ -24,7 +24,7 @@ class PathFinder:
 
         """
         self._errors = errors
-        self._paths_list = list()
+        self._paths = self._find_paths()
 
     @staticmethod
     def skip_lists(data: Union[dict, list]) -> Any:
@@ -89,15 +89,12 @@ class PathFinder:
 
         return tuple(path)
 
-    def get_paths(self) -> tuple:
+    def _find_paths(self) -> tuple:
         """
-        Get paths to all elements of error nested dictionaries.
-
-        Returns
-        -------
-        tuple : A list of all paths. Each path is represented by a tuple consisting a sequence of keys.
+        Find paths to all elements of error nested dictionaries.
 
         """
+        paths = list()
         errors = deepcopy(self._errors)
         temp_errors = deepcopy(self._errors)
 
@@ -105,15 +102,15 @@ class PathFinder:
             path = self._get_path_to_element(temp_errors)
 
             if self._get_element_by_path(errors, path) != {}:
-                self._paths_list.append(path)
+                paths.append(path)
 
             self._del_element_by_path(errors, path)
             temp_errors = deepcopy(errors)
 
-        return tuple(self._paths_list)
+        return tuple(paths)
 
     @property
-    def paths(self) -> Union[tuple, list]:
+    def paths(self) -> tuple:
         """
         Property of a list with all paths coming from an error dictionary.
 
@@ -122,4 +119,4 @@ class PathFinder:
         tuple : A list of all paths.
 
         """
-        return self._paths_list
+        return self._paths

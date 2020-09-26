@@ -24,8 +24,8 @@ class ErrConverter:
 
         """
         self._path_to_file = path_to_file
-        self._any_error = False
-        self._error_list = list()
+        self.any_error = False
+        self.error_list = list()
         self._user_defined_records = self._read_predefined_messages()
 
     def _read_predefined_messages(self) -> tuple:
@@ -59,8 +59,8 @@ class ErrConverter:
         Notify occurred errors.
 
         """
-        self._any_error = True
-        self._error_list.append(error)
+        self.any_error = True
+        self.error_list.append(error)
 
     def convert_message(self, error: ValidationError, message: str) -> str:
         """
