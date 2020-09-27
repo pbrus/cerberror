@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch, PropertyMock
 import pytest
 
 from cerberror.trans import Translator
-from tests.test_errors import path_to_file
+from tests.test_errors import path_to_file, ValidationError
 
 
 @pytest.fixture
@@ -60,3 +60,25 @@ def test_get_paths_fail(
 
     path_finder_paths_mock.assert_called_once()
     report_error_mock.assert_called_once_with("No path was found")
+
+
+@pytest.mark.parametrize(
+    "errors, result",
+    [
+        ("Error occurred", ["Error occurred"]),
+        (["Error1", "Error2", "Error3"], ["Error1", "Error2", "Error3"]),
+    ],
+)
+def test_report_error(errors, result):
+    err = "messages"
+    validator = ValidationError({"errors": err})
+    translator = Translator(validator, path_to_file)
+
+    if isinstance(errors, str):
+        translator._report_error(errors)
+    else:
+        translator._report_error(*errors)
+
+    assert translator._any_error
+    assert translator._error_list == result
+    assert translator._errors == err
