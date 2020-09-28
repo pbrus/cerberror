@@ -25,6 +25,22 @@ def path_finder_init_mock(path_finder_paths_mock):
 
 
 @pytest.fixture
+def converter_records_mock():
+    with patch(
+        "cerberror.trans.ErrConverter.user_defined_records",
+        return_value=None,
+        new_callable=PropertyMock,
+    ) as mock:
+        yield mock
+
+
+@pytest.fixture
+def converter_init_mock(converter_records_mock):
+    with patch("cerberror.trans.ErrConverter.__init__", return_value=None) as mock:
+        yield mock
+
+
+@pytest.fixture
 def init_mock():
     with patch("cerberror.trans.Translator.__init__", return_value=None) as mock:
         yield mock
@@ -38,11 +54,20 @@ def report_error_mock():
 
 @pytest.fixture
 def translator_init_report_error_mock(
-    init_mock, report_error_mock, path_finder_init_mock, path_finder_paths_mock
+    init_mock,
+    report_error_mock,
+    path_finder_init_mock,
+    path_finder_paths_mock,
+    converter_init_mock,
+    converter_records_mock,
 ):
     translator = Translator(Mock(), path_to_file)
+    translator._path_to_file = path_to_file
     translator._validator = Mock()
     yield translator
+
+
+# ==================== TESTS ====================
 
 
 def test_get_paths(translator_init_report_error_mock, report_error_mock, path_finder_paths_mock):
@@ -60,6 +85,12 @@ def test_get_paths_fail(
 
     path_finder_paths_mock.assert_called_once()
     report_error_mock.assert_called_once_with("No path was found")
+
+
+def test_get_records(translator_init_report_error_mock, converter_records_mock):
+    translator_init_report_error_mock._get_records()
+
+    converter_records_mock.assert_called_once()
 
 
 @pytest.mark.parametrize(

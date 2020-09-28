@@ -6,6 +6,7 @@ from pathlib import Path
 
 from cerberus import Validator
 
+from cerberror.errors import ErrConverter
 from cerberror.paths import PathFinder
 
 
@@ -30,7 +31,7 @@ class Translator:
         self._any_error = False
         self._error_list = list()
         self._paths = None
-        self._user_defined_records = None
+        self._records = None
         self._errors = dict()
 
     def _get_paths(self) -> tuple:
@@ -45,6 +46,16 @@ class Translator:
             self._report_error("No path was found")
 
         return self._paths
+
+    def _get_records(self) -> tuple:
+        """
+        Get records (paths, err codes, messages) defined by user.
+
+        """
+        converter = ErrConverter(self._path_to_file)
+        self._records = converter.user_defined_records
+
+        return self._records
 
     def _report_error(self, *errors: str) -> None:
         """
@@ -72,3 +83,21 @@ class Translator:
             self._get_paths()
 
         return self._paths
+
+    @property
+    def records(self) -> tuple:
+        """
+        Get records defined by a user in a text file.
+
+        Returns
+        -------
+        tuple : A list of records. Each record consists of:
+                - path to message
+                - code of error
+                - predefined message
+
+        """
+        if (self._records is None) and (not self._any_error):
+            self._get_records()
+
+        return self._records
