@@ -46,7 +46,7 @@ def translator_init_report_error_mock(
 
 
 def test_get_paths(translator_init_report_error_mock, report_error_mock, path_finder_paths_mock):
-    translator_init_report_error_mock.get_paths()
+    translator_init_report_error_mock._get_paths()
 
     path_finder_paths_mock.assert_called_once()
     report_error_mock.assert_not_called()
@@ -56,7 +56,7 @@ def test_get_paths_fail(
     translator_init_report_error_mock, report_error_mock, path_finder_paths_mock
 ):
     path_finder_paths_mock.return_value = tuple()
-    translator_init_report_error_mock.get_paths()
+    translator_init_report_error_mock._get_paths()
 
     path_finder_paths_mock.assert_called_once()
     report_error_mock.assert_called_once_with("No path was found")

@@ -33,13 +33,9 @@ class Translator:
         self._user_defined_records = None
         self._errors = dict()
 
-    def get_paths(self) -> tuple:
+    def _get_paths(self) -> tuple:
         """
-        Get paths to all elements of Cerberus error nested dictionaries.
-
-        Returns
-        -------
-        tuple : A list of all paths.
+        Get paths to all errors produced by Cerberus.
 
         """
         path_finder = PathFinder(self._validator.errors)
@@ -61,3 +57,18 @@ class Translator:
             self._error_list.append(error)
 
         self._errors = self._validator.errors
+
+    @property
+    def paths(self) -> tuple:
+        """
+        Get paths to all elements of Cerberus error contained in nested dictionaries.
+
+        Returns
+        -------
+        tuple : A list of all paths.
+
+        """
+        if (self._paths is None) and (not self._any_error):
+            self._get_paths()
+
+        return self._paths
