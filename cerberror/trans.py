@@ -67,8 +67,6 @@ class Translator:
         for error in errors:
             self._error_list.append(error)
 
-        self._errors = self._validator.errors
-
     @property
     def paths(self) -> tuple:
         """

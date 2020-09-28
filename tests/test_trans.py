@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch, PropertyMock
 import pytest
 
 from cerberror.trans import Translator
-from tests.test_errors import path_to_file, ValidationError
+from tests.test_errors import path_to_file
 
 
 @pytest.fixture
@@ -101,9 +101,7 @@ def test_get_records(translator_init_report_error_mock, converter_records_mock):
     ],
 )
 def test_report_error(errors, result):
-    err = "messages"
-    validator = ValidationError({"errors": err})
-    translator = Translator(validator, path_to_file)
+    translator = Translator({}, path_to_file)
 
     if isinstance(errors, str):
         translator._report_error(errors)
@@ -112,4 +110,3 @@ def test_report_error(errors, result):
 
     assert translator._any_error
     assert translator._error_list == result
-    assert translator._errors == err
