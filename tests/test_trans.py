@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch, PropertyMock
 
 import pytest
 
-from cerberror.trans import Translator
+from cerberror.trans import Translator, ErrConverter
 from tests.test_errors import path_to_file
 
 
@@ -63,6 +63,7 @@ def translator_init_report_error_mock(
 ):
     translator = Translator(Mock(), path_to_file)
     translator._path_to_file = path_to_file
+    translator._converter = ErrConverter(path_to_file)
     translator._validator = Mock()
     yield translator
 

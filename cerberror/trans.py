@@ -28,6 +28,7 @@ class Translator:
         """
         self._validator = validator
         self._path_to_file = Path(path_to_file)
+        self._converter = ErrConverter(self._path_to_file)
         self._any_error = False
         self._error_list = list()
         self._paths = None
@@ -52,8 +53,7 @@ class Translator:
         Get records (paths, err codes, messages) defined by user.
 
         """
-        converter = ErrConverter(self._path_to_file)
-        self._records = converter.user_defined_records
+        self._records = self._converter.user_defined_records
 
         return self._records
 
@@ -99,3 +99,43 @@ class Translator:
             self._get_records()
 
         return self._records
+
+    @property
+    def validator(self) -> Validator:
+        """
+        Get validator of Cerberus.
+
+        Returns
+        -------
+        Validator : Cerberus's validator.
+
+        """
+        return self._validator
+
+    @validator.setter
+    def validator(self, new_validator: Validator) -> None:
+        """
+        Setter for validator.
+
+        """
+        self.__init__(new_validator, self._path_to_file)
+
+    @property
+    def path_to_file(self) -> Path:
+        """
+        Get path to file which stores user defined records.
+
+        Returns
+        -------
+        Path : path to the file with customized messages.
+
+        """
+        return self._path_to_file
+
+    @path_to_file.setter
+    def path_to_file(self, new_path_to_file) -> None:
+        """
+        Setter for path_to_file.
+
+        """
+        self.__init__(self._validator, new_path_to_file)
