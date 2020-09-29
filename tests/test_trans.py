@@ -7,7 +7,31 @@ from unittest.mock import Mock, patch, PropertyMock
 import pytest
 
 from cerberror.trans import Translator, ErrConverter
-from tests.test_errors import path_to_file
+from tests.test_errors import path_to_file, ValidationError
+
+
+class Validator:
+    """Class emulating Validator of Cerberus."""
+
+    def __init__(self, dct):
+        self.document_error_tree = DocumentErrorTree(dct)
+
+
+class DocumentErrorTree:
+    """Class emulating Document Error Tree of Cerberus."""
+
+    def __init__(self, dct):
+        self._dct = self._convert(dct)
+
+    @staticmethod
+    def _convert(dct):
+        for key in dct:
+            dct.update({key: [ValidationError(i) for i in dct[key]]})
+
+        return dct
+
+    def fetch_errors_from(self, path):
+        return self._dct[path]
 
 
 @pytest.fixture
@@ -111,3 +135,114 @@ def test_report_error(errors, result):
 
     assert translator._any_error
     assert translator._error_list == result
+
+
+@pytest.mark.parametrize(
+    "paths, pre_errors, records, sep, result",
+    [
+        (
+            (("a", "b", "c", "d"), ("a", "b", "c", "e"), ("a", "b", "bb")),
+            {
+                ("a", "b", "c", "d"): [{"code": 66, "value": 3, "constraint": 5}],
+                ("a", "b", "c", "e"): [{"code": 36}],
+                ("a", "b", "bb"): [
+                    {"code": 66, "value": 6, "constraint": 10},
+                    {"code": 68, "value": 5, "constraint": [1, 2, 3]},
+                ],
+            },
+            (
+                (("a", "b", "c", "d"), 66, "{{value}} is less than {{constraint}}"),
+                (("a", "b", "c", "e"), 36, "This number should be type of integer, bro!"),
+                (("a", "b", "bb"), 66, "{{value}} cannot be less than {{constraint}}"),
+                (("a", "b", "bb"), 68, "Only allowed values are {{constraint}}, not {{value}}"),
+            ),
+            " -> ",
+            {
+                "a -> b -> c -> d": ["3 is less than 5"],
+                "a -> b -> c -> e": ["This number should be type of integer, bro!"],
+                "a -> b -> bb": [
+                    "6 cannot be less than 10",
+                    "Only allowed values are [1, 2, 3], not 5",
+                ],
+            },
+        ),
+        (
+            ((1, 2, "a"), ("b",), ("c", "d", "e")),
+            {
+                (1, 2, "a"): [{"code": 11, "value": 15.5, "type": "float"}],
+                ("b",): [{"code": 2}, {"code": 404}],
+                ("c", "d", "e"): [{"code": 28, "value": "Python", "constraint": "string"}],
+            },
+            (
+                ((1, 2, "a"), 11, "{{value}} cannot be {{type}}"),
+                (("b",), 2, "Awesome error"),
+                (("c", "d", "e"), 28, "Value {{value}} is a {{constraint}}, it shouldn't be!"),
+                (("b",), 404, "Another awesome error"),
+            ),
+            ".",
+            {
+                "1.2.a": ["15.5 cannot be float"],
+                "b": ["Awesome error", "Another awesome error"],
+                "c.d.e": ["Value Python is a string, it shouldn't be!"],
+            },
+        ),
+    ],
+)
+def test_translate(
+    translator_init_report_error_mock, report_error_mock, paths, pre_errors, records, sep, result
+):
+    translator_init_report_error_mock._validator = Validator(pre_errors)
+    translator_init_report_error_mock._paths = paths
+    translator_init_report_error_mock._records = records
+
+    translator_init_report_error_mock._translate(sep)
+
+    assert translator_init_report_error_mock._errors == result
+    report_error_mock.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "paths, pre_errors, records, calls",
+    [
+        (
+            (("a", "b", "c", "d"), ("a", "b", "c", "e"), ("a", "b", "bb")),
+            {
+                ("a", "b", "c", "d"): [{"code": 66, "value": 3, "constraint": 5}],
+                ("a", "b", "c", "e"): [{"code": 36}],
+                ("a", "b", "bb"): [
+                    {"code": 66, "value": 6, "constraint": 10},
+                    {"code": 68, "value": 5, "constraint": [1, 2, 3]},
+                ],
+            },
+            (
+                (("a", "b", "c", "d"), 66, "{{value}} is less than {{constraint}}"),
+                (("a", "b", "bb"), 66, "{{value}} cannot be less than {{constraint}}"),
+            ),
+            2,
+        ),
+        (
+            ((1, 2, "a"), ("b",), ("c", "d", "e")),
+            {
+                (1, 2, "a"): [{"code": 11, "value": 15.5, "type": "float"}],
+                ("b",): [{"code": 2}, {"code": 404}],
+                ("c", "d", "e"): [{"code": 28, "value": "Python", "constraint": "string"}],
+            },
+            (
+                ((1, 2, "a"), 11, "{{value}} cannot be {{type}}"),
+                (("b",), 2, "Awesome error"),
+                (("c", "d", "e"), 28, "Value {{value}} is a {{constraint}}, it shouldn't be!"),
+            ),
+            1,
+        ),
+    ],
+)
+def test_translate_fail(
+    translator_init_report_error_mock, report_error_mock, paths, pre_errors, records, calls
+):
+    translator_init_report_error_mock._validator = Validator(pre_errors)
+    translator_init_report_error_mock._paths = paths
+    translator_init_report_error_mock._records = records
+
+    translator_init_report_error_mock._translate(">>")
+
+    assert report_error_mock.call_count == calls
