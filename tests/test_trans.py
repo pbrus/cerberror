@@ -195,9 +195,7 @@ def test_translate(
     translator_init_report_error_mock._paths = paths
     translator_init_report_error_mock._records = records
 
-    translator_init_report_error_mock._translate(sep)
-
-    assert translator_init_report_error_mock._errors == result
+    assert translator_init_report_error_mock._translate(sep) == result
     report_error_mock.assert_not_called()
 
 

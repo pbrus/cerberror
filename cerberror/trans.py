@@ -33,7 +33,6 @@ class Translator:
         self._error_list = list()
         self._paths = None
         self._records = None
-        self._errors = dict()
 
     def _get_paths(self) -> tuple:
         """
@@ -57,12 +56,12 @@ class Translator:
 
         return self._records
 
-    def _translate(self, sep: str) -> None:
+    def _translate(self, sep: str) -> dict:
         """
         Translate errors into defined messages.
 
         """
-        self._errors = dict()
+        errors = dict()
 
         for path in self.paths:
             for error in self._validator.document_error_tree.fetch_errors_from(path):
@@ -72,16 +71,18 @@ class Translator:
                         no_record = True
                         key = sep.join(map(str, path))
 
-                        if key not in self._errors:
-                            self._errors.update({key: [self._converter.convert_message(error, record[-1])]})
+                        if key not in errors:
+                            errors.update({key: [self._converter.convert_message(error, record[-1])]})
                         else:
-                            self._errors[key].append(self._converter.convert_message(error, record[-1]))
+                            errors[key].append(self._converter.convert_message(error, record[-1]))
 
                 if not no_record:
                     self._report_error(
                         f"File '{self._path_to_file}' does not contain a record "
                         f"for path {path} and error code {error.code}"
                     )
+
+        return errors
 
     def _report_error(self, *errors: str) -> None:
         """
