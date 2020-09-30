@@ -103,15 +103,13 @@ def translator_init_report_error_mock(
 
 
 @pytest.fixture
-def translator_init_report_error_translate_mock(init_mock, report_error_mock, _translate_mock):
+def translator_init_report_error__translate_mock(init_mock, report_error_mock, _translate_mock):
     converter, validator = MagicMock(), Mock()
-    converter.any_error = False
     validator.errors = cerberus_errors_result
 
     translator = Translator(Mock(), path_to_file)
     translator._validator = validator
     translator._converter = converter
-    translator._any_error = False
     yield translator
 
 
@@ -269,21 +267,65 @@ def test__translate_fail(
     assert report_error_mock.call_count == calls
 
 
-def test_translate(translator_init_report_error_translate_mock, report_error_mock, _translate_mock):
-    result = translator_init_report_error_translate_mock.translate()
+@pytest.mark.parametrize(
+    "conv_any_err, trans_any_err, result",
+    [
+        (False, [False, False], _translate_result),
+        (False, [False, True], cerberus_errors_result),
+        (False, [True, True], cerberus_errors_result),
+        (True, [False, False], cerberus_errors_result),
+        (True, [True, True], cerberus_errors_result),
+    ],
+)
+def test_translate_return(
+    translator_init_report_error__translate_mock, conv_any_err, trans_any_err, result
+):
+    translator_init_report_error__translate_mock._converter.any_error = conv_any_err
+    type(translator_init_report_error__translate_mock)._any_error = PropertyMock(
+        side_effect=trans_any_err
+    )
+
+    assert translator_init_report_error__translate_mock.translate() == result
+
+
+@pytest.mark.parametrize(
+    "conv_any_err, trans_any_err", [(False, [False, False]), (False, [False, True])]
+)
+def test_translate(
+    translator_init_report_error__translate_mock,
+    report_error_mock,
+    _translate_mock,
+    conv_any_err,
+    trans_any_err,
+):
+    translator_init_report_error__translate_mock._converter.any_error = conv_any_err
+    type(translator_init_report_error__translate_mock)._any_error = PropertyMock(
+        side_effect=trans_any_err
+    )
+
+    translator_init_report_error__translate_mock.translate()
 
     _translate_mock.assert_called_once()
     report_error_mock.assert_not_called()
-    assert result == _translate_result
 
 
+@pytest.mark.parametrize(
+    "conv_any_err, trans_any_err",
+    [(False, [True, True]), (True, [False, False]), (True, [True, True])],
+)
 def test_translate_fail(
-    translator_init_report_error_translate_mock, report_error_mock, _translate_mock
+    translator_init_report_error__translate_mock,
+    report_error_mock,
+    _translate_mock,
+    conv_any_err,
+    trans_any_err,
 ):
-    translator_init_report_error_translate_mock._any_error = True
+    translator_init_report_error__translate_mock._converter.any_error = conv_any_err
+    type(translator_init_report_error__translate_mock)._any_error = PropertyMock(
+        side_effect=trans_any_err
+    )
 
-    result = translator_init_report_error_translate_mock.translate()
+    translator_init_report_error__translate_mock.translate()
 
     _translate_mock.assert_not_called()
     report_error_mock.assert_called_once()
-    assert result == cerberus_errors_result

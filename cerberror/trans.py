@@ -77,6 +77,9 @@ class Translator:
         else:
             self._errors = self._translate(sep)
 
+        if self._any_error:
+            self._errors = self._validator.errors
+
         return self._errors
 
     def _translate(self, sep: str) -> dict:
