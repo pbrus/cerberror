@@ -2,12 +2,15 @@
 Unit tests for cerberror.trans module.
 
 """
-from unittest.mock import Mock, patch, PropertyMock
+from unittest.mock import MagicMock, Mock, patch, PropertyMock
 
 import pytest
 
 from cerberror.trans import Translator, ErrConverter
 from tests.test_errors import path_to_file, ValidationError
+
+_translate_result = {"_translate": "result"}
+cerberus_errors_result = {"cerberus": "errors"}
 
 
 class Validator:
@@ -77,6 +80,13 @@ def report_error_mock():
 
 
 @pytest.fixture
+def _translate_mock():
+    with patch("cerberror.trans.Translator._translate") as mock:
+        mock.return_value = _translate_result
+        yield mock
+
+
+@pytest.fixture
 def translator_init_report_error_mock(
     init_mock,
     report_error_mock,
@@ -89,6 +99,19 @@ def translator_init_report_error_mock(
     translator._path_to_file = path_to_file
     translator._converter = ErrConverter(path_to_file)
     translator._validator = Mock()
+    yield translator
+
+
+@pytest.fixture
+def translator_init_report_error_translate_mock(init_mock, report_error_mock, _translate_mock):
+    converter, validator = MagicMock(), Mock()
+    converter.any_error = False
+    validator.errors = cerberus_errors_result
+
+    translator = Translator(Mock(), path_to_file)
+    translator._validator = validator
+    translator._converter = converter
+    translator._any_error = False
     yield translator
 
 
@@ -188,7 +211,7 @@ def test_report_error(errors, result):
         ),
     ],
 )
-def test_translate(
+def test__translate(
     translator_init_report_error_mock, report_error_mock, paths, pre_errors, records, sep, result
 ):
     translator_init_report_error_mock._validator = Validator(pre_errors)
@@ -234,7 +257,7 @@ def test_translate(
         ),
     ],
 )
-def test_translate_fail(
+def test__translate_fail(
     translator_init_report_error_mock, report_error_mock, paths, pre_errors, records, calls
 ):
     translator_init_report_error_mock._validator = Validator(pre_errors)
@@ -244,3 +267,23 @@ def test_translate_fail(
     translator_init_report_error_mock._translate(">>")
 
     assert report_error_mock.call_count == calls
+
+
+def test_translate(translator_init_report_error_translate_mock, report_error_mock, _translate_mock):
+    result = translator_init_report_error_translate_mock.translate()
+
+    _translate_mock.assert_called_once()
+    report_error_mock.assert_not_called()
+    assert result == _translate_result
+
+
+def test_translate_fail(
+    translator_init_report_error_translate_mock, report_error_mock, _translate_mock
+):
+    translator_init_report_error_translate_mock._any_error = True
+
+    result = translator_init_report_error_translate_mock.translate()
+
+    _translate_mock.assert_not_called()
+    report_error_mock.assert_called_once()
+    assert result == cerberus_errors_result
