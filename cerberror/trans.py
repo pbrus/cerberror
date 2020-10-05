@@ -108,6 +108,9 @@ class Translator:
                         f"for path {path} and error code {error.code}"
                     )
 
+        if self._converter.any_error:
+            self._report_error(*self._converter.error_list)
+
         return errors
 
     def _report_error(self, *errors: str) -> None:

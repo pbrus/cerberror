@@ -97,7 +97,9 @@ def translator_init_report_error_mock(
 ):
     translator = Translator(Mock(), path_to_file)
     translator._path_to_file = path_to_file
-    translator._converter = ErrConverter(path_to_file)
+    converter = ErrConverter(path_to_file)
+    converter.any_error = False
+    translator._converter = converter
     translator._validator = Mock()
     yield translator
 
