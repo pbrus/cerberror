@@ -46,7 +46,7 @@ $ pip3 install cerberror
 ```
 
 ## Features
-**Cerberus** has a few features which facilitate the usage of it.
+**Cerberror** has a few features which facilitate the usage of it.
 ### Updates
 Just like the validator of Cerberus, `Translator` object can be updated at any time:
 ```python
