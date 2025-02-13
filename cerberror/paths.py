@@ -2,6 +2,7 @@
 The module contains PathFinder class which goes through dictionary of errors and gets all paths to elements.
 
 """
+
 from copy import deepcopy
 from functools import reduce
 from operator import getitem

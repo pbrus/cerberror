@@ -2,9 +2,11 @@
 The module contains ErrConverter class replacing Cerberus errors to those defined by a user.
 
 """
+
 import re
 from ast import literal_eval
 from pathlib import Path
+from typing import Union
 
 from cerberus.errors import ValidationError
 
@@ -15,7 +17,7 @@ class ErrConverter:
 
     """
 
-    def __init__(self, path_to_file: str) -> None:
+    def __init__(self, path_to_file: Union[str, Path]) -> None:
         """
         Initialize an object.
 
