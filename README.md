@@ -1,6 +1,6 @@
 # Cerberror
 ![CI](https://github.com/pbrus/cerberror/workflows/CI/badge.svg?branch=master)
-[![Python](https://img.shields.io/badge/Python-%203.7%20|%203.8%20|%203.9%20|%203.10%20|%203.11%20|%203.12%20|%203.13%20-blue.svg "Python")](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-%203.10%20|%203.11%20|%203.12%20|%203.13%20-blue.svg "Python")](https://www.python.org/)
 [![Style](https://img.shields.io/badge/code%20style-Black-black.svg "Black")](https://black.readthedocs.io/en/stable/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg "MIT license")](https://github.com/pbrus/cerberror/blob/master/LICENSE)
 
